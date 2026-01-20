@@ -10,6 +10,10 @@ export class GameManager {
     return game;
   }
 
+  getGame(roomId: string): Game | null {
+    return this.games.get(roomId) || null;
+  }
+
   private generateRoomCode(): string {
     let code = "";
     do {

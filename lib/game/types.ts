@@ -8,14 +8,16 @@ export type Player = {
     id: string,
     name: string,
     score: number,
+    hiveLevel: number,
     answers: string[] | null;
 }
 
 export type GameState = {
     roomId: string,
     phase: Phase,
-    question: string | null,
+    prompt: string | null,
     theme: string,
     players: Player[],
+    timer: Date | null,
     version: number
 }
