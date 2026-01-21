@@ -2,13 +2,15 @@ import { NextResponse } from "next/server";
 import GameManagerInstance from "@/lib/game/manager";
 
 type RouteParams = {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 };
 
 export async function GET(_request: Request, { params }: RouteParams) {
-  const game = GameManagerInstance.getGame(params.id);
+  const { id } = await params;
+  const game = GameManagerInstance.getGame(id);
+  console.log(GameManagerInstance);
   if (!game) {
     return NextResponse.json({ error: "Game not found" }, { status: 404 });
   }

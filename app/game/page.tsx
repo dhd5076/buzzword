@@ -11,7 +11,7 @@ type GameState = {
 
 export default function Game() {
   const params = useSearchParams();
-  const roomId = params.get("id") || null;
+  const roomId = params.get("roomId") || null;
   const [gameState, setGameState] = useState<GameState | null>(null);
 
   useEffect(() => {

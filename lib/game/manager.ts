@@ -26,6 +26,19 @@ export class GameManager {
     return code;
   }
 }
+// This is absolute trash, forces Next.JS to share some memory globally between workers
+// This will absolute cause bugs later, prevents deployment to serverless
+// but works for now. Will use something like Redis later.
 
-const GameManagerInstance = new GameManager();
+const globalForGameManager = globalThis as {
+  gameManager?: GameManager;
+};
+
+const GameManagerInstance =
+  globalForGameManager.gameManager ?? new GameManager();
+
+if (!globalForGameManager.gameManager) {
+  globalForGameManager.gameManager = GameManagerInstance;
+}
+
 export default GameManagerInstance;
