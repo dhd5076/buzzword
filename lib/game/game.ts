@@ -33,7 +33,11 @@ export class Game {
     }
 
     handleSubmitAnswers(playerId: string, answers: string[]) {
-        throw new Error("Method not implemented.");
+        const player = this.state.players.find(p => p.id === playerId);
+        if (!player) return;
+        player.answers = answers;
+        this.state.version += 1;
+        console.log(`Player ${playerId} submitted answers:`, answers);
     }
 
     startGame() {

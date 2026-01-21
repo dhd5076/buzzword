@@ -18,3 +18,19 @@ export async function startGame(formData: FormData) {
 
   game.startGame();
 }
+
+export async function submitAnswers(formData: FormData) {
+  const roomId = String(formData.get("roomId") || "").trim();
+  const playerId = String(formData.get("playerId") || "").trim();
+  if (!roomId || !playerId) return;
+
+  const answers = formData
+    .getAll("answers")
+    .map((value) => String(value).trim())
+    .filter((value) => value.length > 0);
+
+  const game = GameManagerInstance.getGame(roomId);
+  if (!game) return;
+
+  game.handleSubmitAnswers(playerId, answers);
+}

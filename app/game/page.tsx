@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { startGame } from "../actions";
+import { startGame, submitAnswers } from "../actions";
 
 type GameState = {
   roomId: string;
@@ -42,6 +42,7 @@ export default function Game() {
     };
 
     fetchState();
+    // Cause I didn't feel like websockets, this is not scalable, but it'll for a few dozen instances :D
     const intervalId = window.setInterval(fetchState, 1000);
 
     return () => {
@@ -125,26 +126,31 @@ export default function Game() {
             {gameState?.prompt ?? "Waiting for prompt..."}
           </div>
 
-          <div className="mt-6 space-y-3">
+          <form action={submitAnswers} className="mt-6 space-y-3">
+            <input name="roomId" type="hidden" value={roomId ?? ""} />
+            <input name="playerId" type="hidden" value={playerId ?? ""} />
             <input
               className="w-full rounded-xl bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/40"
               placeholder="Answer 1"
               type="text"
+              name="answers"
             />
             <input
               className="w-full rounded-xl bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/40"
               placeholder="Answer 2"
               type="text"
+              name="answers"
             />
             <input
               className="w-full rounded-xl bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/40"
               placeholder="Answer 3"
               type="text"
+              name="answers"
             />
             <button className="w-full rounded-xl bg-yellow-300 px-4 py-3 text-sm font-semibold text-black">
               Submit
             </button>
-          </div>
+          </form>
         </section>
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
