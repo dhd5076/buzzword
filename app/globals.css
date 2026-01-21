@@ -34,3 +34,26 @@ h2,
 h3 {
   font-family: var(--font-display), sans-serif;
 }
+
+@keyframes floaty {
+  0% {
+    transform: translateY(-10px);
+  }
+  25% {
+    transform: translateY(-2px);
+  }
+  50% {
+    transform: translateY(10px);
+  }
+  75% {
+    transform: translateY(-2px);
+  }
+  100% {
+    transform: translateY(-10px);
+  }
+}
+
+.bee-float {
+  animation: floaty 6s ease-in-out infinite;
+  will-change: transform;
+}
