@@ -4,7 +4,9 @@ export class GameManager {
   private games = new Map<string, Game>();
 
   createGame(theme: string): Game {
+    console.log("Request received to create game with theme:", theme);
     const roomId = this.generateRoomCode();
+    console.log("Room Code: ", roomId);
     const game = new Game(roomId, theme);
     this.games.set(roomId, game);
     return game;
@@ -24,3 +26,6 @@ export class GameManager {
     return code;
   }
 }
+
+const GameManagerInstance = new GameManager();
+export default GameManagerInstance;

@@ -1,3 +1,5 @@
+import { createGame } from "./actions";
+
 export default function Home() {
   return (
     <div className="relative flex min-h-screen flex-col text-black">
@@ -16,19 +18,20 @@ export default function Home() {
             Inspired by the classic party game <b>Hive Mind</b> by Richard Garfield
           </p>
           <div className="mt-8 rounded-2xl border border-black/20 bg-black/80 backdrop-blur">
-            <div className="p-6 space-y-3">
+            <form action={createGame} className="p-6 space-y-3">
               <label className="block text-white font-semibold text-xl">
                 Theme
                 <textarea
                   className="w-full bg-white text-black font-normal p-4 rounded-xl mt-4"
                   placeholder='90s cartoons, fast food, travel, music, etc.'
                   rows={3}
+                  name="theme"
                 />
               </label>
-              <button className="w-full rounded-xl bg-yellow-300 text-xl px-4 py-3 mt-6 font-semibold text-black">
+              <button className="w-full rounded-xl bg-yellow-300 text-xl px-4 py-3 mt-6 font-semibold text-black cursor-pointer hover:bg-yellow-400 transition">
                 Create Game
               </button>
-            </div>
+            </form>
             <hr className="border-white/20 mx-6"></hr>
             <div className="text-white p-6 font-semibold">
               Have a room code? Join a game →
