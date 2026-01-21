@@ -38,6 +38,13 @@ export class Game {
         player.answers = answers;
         this.state.version += 1;
         console.log(`Player ${playerId} submitted answers:`, answers);
+
+        const allAnswered = this.state.players.every(
+            p => (p.answers?.length ?? 0) > 0
+        );
+        if (allAnswered) {
+            this.evaluateAnswers();
+        }
     }
 
     startGame() {
@@ -48,6 +55,7 @@ export class Game {
 
     evaluateAnswers() {
         throw new Error("Method not implemented.");
+        this.resetAnswers();
     }
 
     endGame() {
@@ -59,6 +67,23 @@ export class Game {
     }
 
     getState(): GameState {
-        return this.state;
+        if (this.state.phase !== "prompt") {
+            return this.state;
+        }
+
+        return {
+            ...this.state,
+            players: this.state.players.map(player => ({
+                ...player,
+                answers: null
+            }))
+        };
+    }
+
+    private resetAnswers() {
+        this.state.players = this.state.players.map(player => ({
+            ...player,
+            answers: null
+        }));
     }
 }

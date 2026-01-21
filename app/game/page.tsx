@@ -19,6 +19,7 @@ export default function Game() {
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [username, setUsername] = useState("");
   const [isJoining, setIsJoining] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   const storageKey = useMemo(() => {
     return roomId ? `buzzword:player:${roomId}` : null;
@@ -50,6 +51,12 @@ export default function Game() {
       window.clearInterval(intervalId);
     };
   }, [roomId]);
+
+  useEffect(() => {
+    if (gameState?.phase !== "prompt") {
+      setHasSubmitted(false);
+    }
+  }, [gameState?.phase]);
 
   if (!roomId) {
     return <div className="min-h-screen p-6">Missing roomId.</div>;
@@ -126,31 +133,42 @@ export default function Game() {
             {gameState?.prompt ?? "Waiting for prompt..."}
           </div>
 
-          <form action={submitAnswers} className="mt-6 space-y-3">
-            <input name="roomId" type="hidden" value={roomId ?? ""} />
-            <input name="playerId" type="hidden" value={playerId ?? ""} />
-            <input
-              className="w-full rounded-xl bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/40"
-              placeholder="Answer 1"
-              type="text"
-              name="answers"
-            />
-            <input
-              className="w-full rounded-xl bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/40"
-              placeholder="Answer 2"
-              type="text"
-              name="answers"
-            />
-            <input
-              className="w-full rounded-xl bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/40"
-              placeholder="Answer 3"
-              type="text"
-              name="answers"
-            />
-            <button className="w-full rounded-xl bg-yellow-300 px-4 py-3 text-sm font-semibold text-black">
-              Submit
-            </button>
-          </form>
+          {gameState?.phase === "prompt" && !hasSubmitted && (
+            <form
+              action={submitAnswers}
+              className="mt-6 space-y-3"
+              onSubmit={() => setHasSubmitted(true)}
+            >
+              <input name="roomId" type="hidden" value={roomId ?? ""} />
+              <input name="playerId" type="hidden" value={playerId ?? ""} />
+              <input
+                className="w-full rounded-xl bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/40"
+                placeholder="Answer 1"
+                type="text"
+                name="answers"
+              />
+              <input
+                className="w-full rounded-xl bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/40"
+                placeholder="Answer 2"
+                type="text"
+                name="answers"
+              />
+              <input
+                className="w-full rounded-xl bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/40"
+                placeholder="Answer 3"
+                type="text"
+                name="answers"
+              />
+              <button className="w-full rounded-xl bg-yellow-300 px-4 py-3 text-sm font-semibold text-black">
+                Submit
+              </button>
+            </form>
+          )}
+          {gameState?.phase === "prompt" && hasSubmitted && (
+            <div className="mt-6 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70">
+              Answers submitted.
+            </div>
+          )}
         </section>
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
