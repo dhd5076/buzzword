@@ -69,13 +69,37 @@ export class Game {
     }
 
     async evaluateAnswers() {
-        var answers = this.state.players.flatMap(player => player.answers || []);
-        var prompt = "Players are submitting answers to the prompt: " + this.state.prompt + " Here are all of the answers: " + answers.join(", ") + ". Your job is to cluster all of the answers that match into clusters, create clusters of answers that refer to the same idea. If an answer doesnt match any other answers, dont create a cluster for it. For each cluster, provide a short proper name for the cluster and list the answers that belong to that cluster. Return the response in JSON format as an array of objects with 'clusterName' and 'answers' fields.";
+        const answers = this.state.players.flatMap(player => player.answers || []);
+        const prompt = "Players are submitting answers to the prompt: " + this.state.prompt + " Here are all of the answers: " + answers.join(", ") + ". Your job is to cluster all of the answers that match into clusters, create clusters of answers that refer to the same idea. If an answer doesnt match any other answers, dont create a cluster for it. For each cluster, provide a short proper name for the cluster and list the answers that belong to that cluster. Return the response in JSON format as an array of objects with 'clusterName' and 'answers' fields.";
 
-        var response = await generateCompletion(prompt);
-        
-        console.log("Evaluated answers into clusters:", response);
+        const raw = await generateCompletion(prompt);
+        console.log("Evaluated answers into clusters:", raw);
 
+        let clusters: Array<{ clusterName: string; answers: string[] }> = [];
+        try {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+                clusters = parsed;
+            }
+        } catch (error) {
+            console.log("Failed to parse clusters:", error);
+            return;
+        }
+
+        // tally up player score for each player
+        this.state.players.forEach(player => {
+            player.score = 0;
+            const playerAnswers = player.answers || [];
+            for (const answer of playerAnswers) {
+                const cluster = clusters.find(c => c.answers.includes(answer));
+                if (cluster) {
+                    player.score += Math.max(cluster.answers.length, 0);
+                }
+            }
+        });
+
+        this.state.phase = "results";
+        this.state.version += 1;
         this.resetAnswers();
     }
 
