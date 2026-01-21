@@ -10,7 +10,6 @@ type RouteParams = {
 export async function GET(_request: Request, { params }: RouteParams) {
   const { id } = await params;
   const game = GameManagerInstance.getGame(id);
-  console.log(GameManagerInstance);
   if (!game) {
     return NextResponse.json({ error: "Game not found" }, { status: 404 });
   }

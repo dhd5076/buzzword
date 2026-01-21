@@ -27,7 +27,7 @@ export default async function generateCompletion(prompt: string): Promise<string
     body: JSON.stringify({
       model,
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.2,
+      temperature: 0.9,
     }),
   });
 

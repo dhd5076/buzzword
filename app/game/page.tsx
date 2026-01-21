@@ -9,7 +9,7 @@ type GameState = {
   phase: string;
   version: number;
   prompt?: string | null;
-  players?: Array<{ id: string; name: string }>;
+  players?: Array<{ id: string; name: string; hiveLevel: number }>;
 };
 
 export default function Game() {
@@ -43,7 +43,7 @@ export default function Game() {
     };
 
     fetchState();
-    // Cause I didn't feel like websockets, this is not scalable, but it'll for a few dozen instances :D
+    // Cause I didn't feel like websockets, this is not scalable, but it'll be fine for a few dozen instances :D
     const intervalId = window.setInterval(fetchState, 1000);
 
     return () => {
@@ -194,7 +194,7 @@ export default function Game() {
                   className="flex items-center justify-between rounded-xl bg-white/10 px-3 py-2"
                 >
                   <span>{player.name}</span>
-                  <span className="text-xs text-white/50">Ready</span>
+                  <span className="text-xs font-black text-white bg-black p-2 rounded-full">Level {player.hiveLevel}</span>
                 </div>
               ))
             )}

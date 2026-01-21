@@ -50,9 +50,9 @@ export class Game {
 
     async setPrompt() {
         const prompt =
-            "This is a game of Hive Mind, you need to generate a prompt based on the theme: " +
+            "You are writing a single, short prompt for a party word-association game. The prompt must be based on the theme: " +
             this.state.theme +
-            " You should respond with a question that is open ended and can have multiple answers. The question should not be too specific or too broad. It should be something that can be answered in a few words or a short sentence. The question should not contain any buzzwords or jargon. The question should be engaging and interesting. The question should mention or ask players to give 3 answers or list 3 things.";
+            ". Write ONE clear, concrete question that asks players to list 3 answers. Keep it simple, everyday, and specific enough to spark variety. Do not include examples, explanations, or extra text. Avoid repeating common or generic prompts.";
 
         const response = await generateCompletion(prompt);
         this.state.prompt = response;
@@ -68,8 +68,14 @@ export class Game {
         this.state.version += 1;
     }
 
-    evaluateAnswers() {
-        throw new Error("Method not implemented.");
+    async evaluateAnswers() {
+        var answers = this.state.players.flatMap(player => player.answers || []);
+        var prompt = "Players are submitting answers to the prompt: " + this.state.prompt + " Here are all of the answers: " + answers.join(", ") + ". Your job is to cluster all of the answers that match into clusters, create clusters of answers that refer to the same idea. If an answer doesnt match any other answers, dont create a cluster for it. For each cluster, provide a short proper name for the cluster and list the answers that belong to that cluster. Return the response in JSON format as an array of objects with 'clusterName' and 'answers' fields.";
+
+        var response = await generateCompletion(prompt);
+        
+        console.log("Evaluated answers into clusters:", response);
+
         this.resetAnswers();
     }
 
