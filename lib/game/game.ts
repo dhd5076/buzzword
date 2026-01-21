@@ -1,3 +1,4 @@
+import generateCompletion from '../llm/vectors';
 import { Player, GameState, Phase } from './types';
 
 export class Game {
@@ -47,9 +48,23 @@ export class Game {
         }
     }
 
-    startGame() {
+    async setPrompt() {
+        const prompt =
+            "This is a game of Hive Mind, you need to generate a prompt based on the theme: " +
+            this.state.theme +
+            " You should respond with a question that is open ended and can have multiple answers. The question should not be too specific or too broad. It should be something that can be answered in a few words or a short sentence. The question should not contain any buzzwords or jargon. The question should be engaging and interesting. The question should mention or ask players to give 3 answers or list 3 things.";
+
+        const response = await generateCompletion(prompt);
+        this.state.prompt = response;
+        console.log("Generated prompt:", this.state.prompt);
+    }
+
+    async startGame() {
         if (this.state.phase !== "lobby") return;
         this.state.phase = "prompt";
+
+        await this.setPrompt();
+
         this.state.version += 1;
     }
 

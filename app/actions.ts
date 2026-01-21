@@ -16,7 +16,7 @@ export async function startGame(formData: FormData) {
   const game = GameManagerInstance.getGame(roomId);
   if (!game) return;
 
-  game.startGame();
+  await game.startGame();
 }
 
 export async function submitAnswers(formData: FormData) {

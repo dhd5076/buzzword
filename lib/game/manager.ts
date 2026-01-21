@@ -1,3 +1,4 @@
+import generateCompletion from "../llm/vectors";
 import { Game } from "./game";
 
 export class GameManager {
