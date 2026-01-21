@@ -9,7 +9,7 @@ export class Game {
             phase: 'lobby',
             prompt: null,
             timer: null,
-            theme: theme,
+            theme,
             players: [],
             version: 0
         };
@@ -34,6 +34,12 @@ export class Game {
 
     handleSubmitAnswers(playerId: string, answers: string[]) {
         throw new Error("Method not implemented.");
+    }
+
+    startGame() {
+        if (this.state.phase !== "lobby") return;
+        this.state.phase = "prompt";
+        this.state.version += 1;
     }
 
     evaluateAnswers() {

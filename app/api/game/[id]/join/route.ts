@@ -1,0 +1,28 @@
+import { NextResponse } from "next/server";
+import GameManagerInstance from "@/lib/game/manager";
+
+type RouteParams = {
+  params: Promise<{
+    id: string;
+  }>;
+};
+
+export async function POST(request: Request, { params }: RouteParams) {
+  const { id } = await params;
+  const body = (await request.json()) as {
+    playerId?: string;
+    name?: string;
+  };
+
+  if (!body.playerId || !body.name) {
+    return NextResponse.json({ error: "Missing player data" }, { status: 400 });
+  }
+
+  const game = GameManagerInstance.getGame(id);
+  if (!game) {
+    return NextResponse.json({ error: "Game not found" }, { status: 404 });
+  }
+
+  game.addPlayer(body.playerId, body.name);
+  return NextResponse.json(game.getState());
+}

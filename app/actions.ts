@@ -8,3 +8,13 @@ export async function createGame(formData: FormData) {
   const game = GameManagerInstance.createGame(theme);
   redirect(`/game?roomId=${game.getState().roomId}`);
 }
+
+export async function startGame(formData: FormData) {
+  const roomId = String(formData.get("roomId") || "").trim();
+  if (!roomId) return;
+
+  const game = GameManagerInstance.getGame(roomId);
+  if (!game) return;
+
+  game.startGame();
+}
