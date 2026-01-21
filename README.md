@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Buzzword
+
+![Buzzword Bee](public/bee.png)
+
+Buzzword is a multiplayer party game about social alignment. Players answer open-ended prompts and score by matching others. Drift too far from the group and you're out.
+
+## Status
+
+MVP in progress. Single-instance, in-memory game state.
+
+## Tech Stack
+
+- Next.js (App Router)
+- React
+- Server Actions + polling for game state
+- Tailwind CSS
+- CamelidCoin
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.example` to `.env` and set:
 
-## Learn More
+- `CAMELIDCOIN_API_KEY`
+- `CAMELIDCOIN_URL`
+- `CAMELIDCOIN_MODEL`
 
-To learn more about Next.js, take a look at the following resources:
+## Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+app/             UI + API routes
+lib/game/        Core game logic
+lib/llm/         LLM helpers
+public/          Static assets
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Notes
 
-## Deploy on Vercel
+- Room state is stored in-memory for MVP.
+- Server Actions are used for create/join/submit flows.
+- `/api/game/[id]` is used for polling game state.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## MVP and Bee-yond
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Redis to stop storing game state in memory. Allows serverless, minimal volatility, better scalability
+- Improve security, game assumes non malicious actors right now. Multiple security features are needed at scale. 
