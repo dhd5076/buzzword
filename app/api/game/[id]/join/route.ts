@@ -7,6 +7,8 @@ type RouteParams = {
   }>;
 };
 
+//we should probably either move all game logic to routes instead of server actions or vice versa for consistency, but for now this works
+
 export async function POST(request: Request, { params }: RouteParams) {
   const { id } = await params;
   const body = (await request.json()) as {

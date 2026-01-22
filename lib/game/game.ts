@@ -70,6 +70,7 @@ export class Game {
 
     async evaluateAnswers() {
         const answers = this.state.players.flatMap(player => player.answers || []);
+        //TODO: answers.join needs proper escaping to avoid injection issues. Fine for now
         const prompt = "Players are submitting answers to the prompt: " + this.state.prompt + " Here are all of the answers: " + answers.join(", ") + ". Your job is to cluster all of the answers that match into clusters, create clusters of answers that refer to the same idea. If an answer doesnt match any other answers, dont create a cluster for it. For each cluster, provide a short proper name for the cluster and list the answers that belong to that cluster. Return the response in JSON format as an array of objects with 'clusterName' and 'answers' fields.";
 
         const raw = await generateCompletion(prompt);
@@ -90,20 +91,42 @@ export class Game {
         this.state.players.forEach(player => {
             player.score = 0;
             const playerAnswers = player.answers || [];
+            //search clusters of answers to see if any of the player's answers are in a cluster, award points based on cluster size.
             for (const answer of playerAnswers) {
                 const cluster = clusters.find(c => c.answers.includes(answer));
                 if (cluster) {
-                    player.score += Math.max(cluster.answers.length, 0);
+                    player.score += cluster.answers.length
                 }
             }
         });
 
         this.state.phase = "results";
         this.state.version += 1;
+
+        //pick the player or players with the lowest score and drop their hive level by 1
+        const lowestScore = Math.min(...this.state.players.map(p => p.score));
+
+        this.state.players.forEach(player => {
+            var losingCondition = false; //So we can check all players and then end the game if needed
+            if (player.score === lowestScore) {
+                if(player.hiveLevel > 1) {
+                    player.hiveLevel -= 1;
+                } else {
+                    losingCondition = true; // we cant endGame here because we need to finish evaluating all players first
+                }
+            }
+            if(losingCondition) {
+                this.endGame();
+            }
+        });
+
         this.resetAnswers();
     }
-
     endGame() {
+        //Debating making this jump to a end screen instead of showing on the same page, we can redirect to a different URL with final stats or something
+        console.log("Game has ended.");
+        this.state.phase = "ended";
+        this.state.version += 1;
         throw new Error("Method not implemented.");
     }
 
