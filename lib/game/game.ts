@@ -9,6 +9,7 @@ export class Game {
             roomId,
             phase: 'lobby',
             prompt: null,
+            promptHistory: [],
             timer: null,
             theme,
             players: [],
@@ -17,11 +18,13 @@ export class Game {
     }
 
     addPlayer(id: string, name: string) {
+        const isHost = this.state.players.length === 0;
         const player: Player = {
             id,
             name,
             score: 0,
             hiveLevel: 4,
+            isHost,
             answers: null
         };
         this.state.players.push(player);
@@ -49,18 +52,40 @@ export class Game {
     }
 
     async setPrompt() {
+        const previousPrompts =
+            this.state.promptHistory.length > 0
+                ? "Do not repeat or closely match these previous prompts: " +
+                  this.state.promptHistory.join(" | ") +
+                  ". "
+                : "";
         const prompt =
             "You are writing a single, short prompt for a party word-association game. The prompt must be based on the theme: " +
             this.state.theme +
-            ". Write ONE clear, concrete question that asks players to list 3 answers. Keep it simple, everyday, and specific enough to spark variety. Do not include examples, explanations, or extra text. Avoid repeating common or generic prompts.";
+            ". " +
+            previousPrompts +
+            "Write ONE clear, concrete question that asks players to list 3 answers. Keep it simple, everyday, and specific enough to spark variety. Do not include examples, explanations, or extra text. Avoid repeating common or generic prompts.";
 
         const response = await generateCompletion(prompt);
         this.state.prompt = response;
+        this.state.promptHistory.push(response);
         console.log("Generated prompt:", this.state.prompt);
     }
 
-    async startGame() {
+    async startGame(playerId: string) {
         if (this.state.phase !== "lobby") return;
+        const player = this.state.players.find(p => p.id === playerId);
+        if (!player?.isHost) return;
+        this.state.phase = "prompt";
+
+        await this.setPrompt();
+
+        this.state.version += 1;
+    }
+
+    async nextRound(playerId: string) {
+        if (this.state.phase !== "results") return;
+        const player = this.state.players.find(p => p.id === playerId);
+        if (!player?.isHost) return;
         this.state.phase = "prompt";
 
         await this.setPrompt();

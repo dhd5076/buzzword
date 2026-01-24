@@ -35,16 +35,20 @@ export default function Home() {
             <hr className="border-white/20 mx-6"></hr>
             <div className="text-white p-6 font-semibold">
               Have a room code? Join a game →
-              <div className="mt-6 flex gap-3">
+              <form className="mt-6 flex gap-3" action="/game" method="GET">
                 <input
                   className="w-full rounded-xl bg-white px-4 py-3 text-black text-sm font-semibold"
                   type="text"
+                  name="roomId"
                   placeholder="Enter Room Code"
                 />
-                <button className="shrink-0 rounded-xl text-sm bg-yellow-300 px-4 py-3 text-sm font-semibold text-black">
+                <button
+                  className="shrink-0 rounded-xl text-sm bg-yellow-300 px-4 py-3 text-sm font-semibold text-black"
+                  type="submit"
+                >
                   Join
                 </button>
-              </div>
+              </form>
             </div>
           </div>
         </section>

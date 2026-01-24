@@ -2,14 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { startGame, submitAnswers } from "../actions";
+import { nextRound, startGame, submitAnswers } from "../actions";
 
 type GameState = {
   roomId: string;
   phase: string;
   version: number;
   prompt?: string | null;
-  players?: Array<{ id: string; name: string; hiveLevel: number }>;
+  players?: Array<{ id: string; name: string; hiveLevel: number; isHost: boolean }>;
 };
 
 export default function Game() {
@@ -21,6 +21,8 @@ export default function Game() {
   const [isJoining, setIsJoining] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
+  //So we can participate as the same player on reloads
+  //Player ID is stored in localStorage per room
   const storageKey = useMemo(() => {
     return roomId ? `buzzword:player:${roomId}` : null;
   }, [roomId]);
@@ -63,6 +65,8 @@ export default function Game() {
   }
 
   const needsJoin = !playerId;
+  const currentPlayer = gameState?.players?.find((player) => player.id === playerId) ?? null;
+  const isHost = currentPlayer?.isHost ?? false;
 
   return (
     <div className="min-h-screen bg-[#11110f]/80 text-white">
@@ -121,7 +125,7 @@ export default function Game() {
           </div>
           <div className="text-lg font-semibold">{roomId}</div>
         </div>
-        <div className="text-sm text-white/60">Phase: {gameState?.phase ?? "..."}</div>
+        <div className="text-sm text-white/60">Phase: {gameState?.phase.toUpperCase() ?? "..."}</div>
       </header>
 
       <main className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 px-6 pb-10 md:grid-cols-[1fr_2fr_1fr]">
@@ -130,7 +134,7 @@ export default function Game() {
             Prompt
           </div>
           <div className="mt-2 text-xl font-semibold">
-            {gameState?.prompt ?? "Waiting for prompt..."}
+            {gameState?.prompt || (gameState?.phase === "lobby" ? "Waiting for the game to start..." : "Generating prompt...")}
           </div>
 
           {gameState?.phase === "prompt" && !hasSubmitted && (
@@ -199,13 +203,26 @@ export default function Game() {
               ))
             )}
           </div>
-          {gameState?.phase === "lobby" && (
+          {gameState?.phase === "lobby" && isHost && (
             <div className="mt-6 space-y-3">
               <div className="text-sm text-white/70">Everyone here?</div>
               <form action={startGame}>
                 <input name="roomId" type="hidden" value={roomId ?? ""} />
+                <input name="playerId" type="hidden" value={playerId ?? ""} />
                 <button className="w-full rounded-xl bg-yellow-300 px-4 py-3 text-sm font-semibold text-black">
                   Start Game
+                </button>
+              </form>
+            </div>
+          )}
+          {gameState?.phase === "results" && isHost && (
+            <div className="mt-6 space-y-3">
+              <div className="text-sm text-white/70">Ready for another prompt?</div>
+              <form action={nextRound}>
+                <input name="roomId" type="hidden" value={roomId ?? ""} />
+                <input name="playerId" type="hidden" value={playerId ?? ""} />
+                <button className="w-full rounded-xl bg-yellow-300 px-4 py-3 text-sm font-semibold text-black">
+                  Next Round
                 </button>
               </form>
             </div>

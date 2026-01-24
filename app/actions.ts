@@ -11,12 +11,24 @@ export async function createGame(formData: FormData) {
 
 export async function startGame(formData: FormData) {
   const roomId = String(formData.get("roomId") || "").trim();
-  if (!roomId) return;
+  const playerId = String(formData.get("playerId") || "").trim();
+  if (!roomId || !playerId) return;
 
   const game = GameManagerInstance.getGame(roomId);
   if (!game) return;
 
-  await game.startGame();
+  await game.startGame(playerId);
+}
+
+export async function nextRound(formData: FormData) {
+  const roomId = String(formData.get("roomId") || "").trim();
+  const playerId = String(formData.get("playerId") || "").trim();
+  if (!roomId || !playerId) return;
+
+  const game = GameManagerInstance.getGame(roomId);
+  if (!game) return;
+
+  await game.nextRound(playerId);
 }
 
 export async function submitAnswers(formData: FormData) {
