@@ -13,7 +13,8 @@ export class Game {
             timer: null,
             theme,
             players: [],
-            version: 0
+            version: 0,
+            results: null
         };
     }
 
@@ -76,6 +77,7 @@ export class Game {
         const player = this.state.players.find(p => p.id === playerId);
         if (!player?.isHost) return;
         this.state.phase = "prompt";
+        this.state.results = null;
 
         await this.setPrompt();
 
@@ -87,6 +89,7 @@ export class Game {
         const player = this.state.players.find(p => p.id === playerId);
         if (!player?.isHost) return;
         this.state.phase = "prompt";
+        this.state.results = null;
 
         await this.setPrompt();
 
@@ -96,7 +99,7 @@ export class Game {
     async evaluateAnswers() {
         const answers = this.state.players.flatMap(player => player.answers || []);
         //TODO: answers.join needs proper escaping to avoid injection issues. Fine for now
-        const prompt = "Players are submitting answers to the prompt: " + this.state.prompt + " Here are all of the answers: " + answers.join(", ") + ". Your job is to cluster all of the answers that match into clusters, create clusters of answers that refer to the same idea. If an answer doesnt match any other answers, dont create a cluster for it. For each cluster, provide a short proper name for the cluster and list the answers that belong to that cluster. Return the response in JSON format as an array of objects with 'clusterName' and 'answers' fields.";
+        const prompt = "Players are submitting answers to the prompt: " + this.state.prompt + " Here are all of the answers: " + answers.join(", ") + ". Your job is to cluster all of the answers that match into clusters, create clusters of answers that refer to the same idea. Each answer can appear in at most one cluster; do not reuse an answer across multiple clusters. If an answer doesnt match any other answers, dont create a cluster for it. For each cluster, provide a short proper name for the cluster and list the answers that belong to that cluster. Return the response in JSON format as an array of objects with 'clusterName' and 'answers' fields.";
 
         const raw = await generateCompletion(prompt);
         console.log("Evaluated answers into clusters:", raw);
@@ -125,17 +128,36 @@ export class Game {
             }
         });
 
+        const answerToPlayers = new Map<string, string[]>();
+        this.state.players.forEach(player => {
+            (player.answers || []).forEach(answer => {
+                const existing = answerToPlayers.get(answer) || [];
+                existing.push(player.name);
+                answerToPlayers.set(answer, existing);
+            });
+        });
+
+        const resultsClusters = clusters.map(cluster => ({
+            clusterName: cluster.clusterName,
+            answers: cluster.answers.map(answer => ({
+                answer,
+                players: answerToPlayers.get(answer) || []
+            }))
+        }));
+
         this.state.phase = "results";
         this.state.version += 1;
 
         //pick the player or players with the lowest score and drop their hive level by 1
         const lowestScore = Math.min(...this.state.players.map(p => p.score));
+        const losers: string[] = [];
 
         this.state.players.forEach(player => {
             var losingCondition = false; //So we can check all players and then end the game if needed
             if (player.score === lowestScore) {
                 if(player.hiveLevel > 1) {
                     player.hiveLevel -= 1;
+                    losers.push(player.name);
                 } else {
                     losingCondition = true; // we cant endGame here because we need to finish evaluating all players first
                 }
@@ -144,6 +166,11 @@ export class Game {
                 this.endGame();
             }
         });
+
+        this.state.results = {
+            clusters: resultsClusters,
+            losers
+        };
 
         this.resetAnswers();
     }

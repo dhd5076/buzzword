@@ -10,6 +10,16 @@ type GameState = {
   version: number;
   prompt?: string | null;
   players?: Array<{ id: string; name: string; hiveLevel: number; isHost: boolean }>;
+  results?: {
+    clusters: Array<{
+      clusterName: string;
+      answers: Array<{
+        answer: string;
+        players: string[];
+      }>;
+    }>;
+    losers: string[];
+  } | null;
 };
 
 export default function Game() {
@@ -180,7 +190,70 @@ export default function Game() {
             Board
           </div>
           <div className="mt-4 text-sm text-white/40">
-            Waiting for round results...
+            {!gameState?.results ? (
+              "Results will be shown here after everyone has submitted their answers."
+            ) : (
+              <div className="space-y-6 text-white/80">
+                <div>
+                  <div className="text-xs uppercase tracking-[0.3em] text-white/50">
+                    Clusters
+                  </div>
+                  {gameState.results.clusters.length === 0 ? (
+                    <div className="mt-2 text-sm text-white/50">
+                      No matching clusters this round.
+                    </div>
+                  ) : (
+                    <div className="mt-3 space-y-4">
+                      {[...gameState.results.clusters]
+                        .sort((a, b) => b.answers.length - a.answers.length)
+                        .map((cluster) => (
+                        <div
+                          key={cluster.clusterName}
+                          className="rounded-xl border border-white/10 bg-white/5 p-4"
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="text-sm font-semibold text-white">
+                              {cluster.clusterName}
+                            </div>
+                            <span className="shrink-0 rounded-full bg-yellow-300/90 px-2.5 py-1 text-xs font-semibold text-black">
+                              +{cluster.answers.length}
+                            </span>
+                          </div>
+                          <div className="mt-3 space-y-2 text-xs text-white/70">
+                            {cluster.answers.map((answer) => (
+                              <div
+                                key={`${cluster.clusterName}-${answer.answer}`}
+                                className="flex flex-col gap-1 rounded-lg bg-white/5 px-3 py-2"
+                              >
+                                <div className="text-sm text-white">
+                                  {answer.answer}
+                                </div>
+                                <div className="text-xs text-white/60">
+                                  {answer.players.length > 0
+                                    ? `Players: ${answer.players.join(", ")}`
+                                    : "Players: —"}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <div className="text-xs uppercase tracking-[0.3em] text-white/50">
+                    Losers
+                  </div>
+                  <div className="mt-2 text-sm text-white/70">
+                    {gameState.results.losers.length > 0
+                      ? gameState.results.losers.join(", ")
+                      : "No one lost a hive level this round."}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </section>
 

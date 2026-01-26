@@ -21,5 +21,15 @@ export type GameState = {
     theme: string,
     players: Player[],
     timer: Date | null,
-    version: number
+    version: number,
+    results: {
+        clusters: Array<{
+            clusterName: string;
+            answers: Array<{
+                answer: string;
+                players: string[];
+            }>;
+        }>;
+        losers: string[];
+    } | null
 }
