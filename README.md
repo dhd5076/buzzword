@@ -1,6 +1,6 @@
 # Buzzword
 
-![Buzzword Bee](public/bee.png)
+![Buzzword Bee](public/logo.png)
 
 Buzzword is a multiplayer party game about social alignment. Players answer open-ended prompts and score by matching others. Drift too far from the group and you're out.
 
@@ -52,3 +52,13 @@ public/          Static assets
 
 - Redis to stop storing game state in memory. Allows serverless, minimal volatility, better scalability
 - Improve security, game assumes non malicious actors right now. Multiple security features are needed at scale. 
+
+## Bug Reports
+- Closed due to excess reports
+- Please mail all non-bug concerns on a single 3x5 index card directly to the hive (Processing time: 3-5 business lifetimes)
+<br><br>
+**The Hive** <br>
+Attn: Quality Assurance <br>
+1 Honeycomb Way <br>
+Buzzville, <br>
+

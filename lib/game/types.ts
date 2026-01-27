@@ -5,7 +5,7 @@ export type Phase =
     | 'ended';
 
 export type Player = {
-    id: string,
+    id: string, //TODO: key? wallet?
     name: string,
     score: number,
     hiveLevel: number,

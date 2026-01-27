@@ -152,18 +152,14 @@ export class Game {
         const lowestScore = Math.min(...this.state.players.map(p => p.score));
         const losers: string[] = [];
 
+        let shouldEndGame = false;
         this.state.players.forEach(player => {
-            var losingCondition = false; //So we can check all players and then end the game if needed
             if (player.score === lowestScore) {
-                if(player.hiveLevel > 1) {
-                    player.hiveLevel -= 1;
-                    losers.push(player.name);
-                } else {
-                    losingCondition = true; // we cant endGame here because we need to finish evaluating all players first
+                player.hiveLevel -= 1;
+                losers.push(player.name);
+                if(player.hiveLevel < 1) {
+                    shouldEndGame = true; // wait until after scoring to end the game
                 }
-            }
-            if(losingCondition) {
-                this.endGame();
             }
         });
 
@@ -172,6 +168,10 @@ export class Game {
             losers
         };
 
+        if (shouldEndGame) {
+            this.endGame();
+        }
+
         this.resetAnswers();
     }
     endGame() {
@@ -179,7 +179,6 @@ export class Game {
         console.log("Game has ended.");
         this.state.phase = "ended";
         this.state.version += 1;
-        throw new Error("Method not implemented.");
     }
 
     resetGame() {

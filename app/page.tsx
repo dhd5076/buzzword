@@ -4,13 +4,15 @@ export default function Home() {
   return (
     <div className="relative flex min-h-screen flex-col text-black">
       <header className="mx-auto flex w-full items-center justify-between px-6 py-6 text-white">
-        <div className="text-4xl font-semibold tracking-tight">
-          Buzzword
-        </div>
+        <img
+          src="/logo.png"
+          alt="Buzzword"
+          className="h-32 w-auto"
+        />
       </header>
 
       <main className="mx-auto grid w-full max-w-6xl flex-1 grid-cols-1 md:grid-cols-2">
-        <section className="flex h-full flex-col pt-20 pb-6 px-6">
+        <section className="flex h-full flex-col pb-6 px-6">
           <h1 className="text-4xl font-semibold leading-tight md:text-5x">
             Match the group. Stay in the hive.
           </h1>

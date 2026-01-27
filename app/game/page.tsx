@@ -190,7 +190,74 @@ export default function Game() {
             Board
           </div>
           <div className="mt-4 text-sm text-white/40">
-            {!gameState?.results ? (
+            {gameState?.phase === "ended" ? (
+              <div className="space-y-6 text-white/80">
+                <div>
+                  <div className="text-xs uppercase tracking-[0.3em] text-white/50">
+                    Game Over
+                  </div>
+                  <div className="mt-2 text-2xl font-semibold text-white">
+                    The hive has spoken.
+                  </div>
+                  <div className="mt-4 text-sm text-white/70">
+                    {gameState.results?.losers?.length
+                      ? `Losers: ${gameState.results.losers.join(", ")}`
+                      : "Losers: —"}
+                  </div>
+                </div>
+                {gameState.results ? (
+                  <div className="space-y-6 text-white/80">
+                    <div>
+                      <div className="text-xs uppercase tracking-[0.3em] text-white/50">
+                        Clusters
+                      </div>
+                      {gameState.results.clusters.length === 0 ? (
+                        <div className="mt-2 text-sm text-white/50">
+                          No matching clusters this round.
+                        </div>
+                      ) : (
+                        <div className="mt-3 space-y-4">
+                          {[...gameState.results.clusters]
+                            .sort((a, b) => b.answers.length - a.answers.length)
+                            .map((cluster) => (
+                              <div
+                                key={cluster.clusterName}
+                                className="rounded-xl border border-white/10 bg-white/5 p-4"
+                              >
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="text-sm font-semibold text-white">
+                                    {cluster.clusterName}
+                                  </div>
+                                  <span className="shrink-0 rounded-full bg-yellow-300/90 px-2.5 py-1 text-xs font-semibold text-black">
+                                    +{cluster.answers.length}
+                                  </span>
+                                </div>
+                                <div className="mt-3 space-y-2 text-xs text-white/70">
+                                  {cluster.answers.map((answer) => (
+                                    <div
+                                      key={`${cluster.clusterName}-${answer.answer}`}
+                                      className="flex flex-col gap-1 rounded-lg bg-white/5 px-3 py-2"
+                                    >
+                                      <div className="text-sm text-white">
+                                        {answer.answer}
+                                      </div>
+                                      <div className="text-xs text-white/60">
+                                        {answer.players.length > 0
+                                          ? `Players: ${answer.players.join(", ")}`
+                                          : "Players: —"}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            ) : !gameState?.results ? (
               "Results will be shown here after everyone has submitted their answers."
             ) : (
               <div className="space-y-6 text-white/80">
@@ -268,10 +335,21 @@ export default function Game() {
               gameState?.players?.map((player) => (
                 <div
                   key={player.id}
-                  className="flex items-center justify-between rounded-xl bg-white/10 px-3 py-2"
+                  className="flex items-center justify-between rounded-xl bg-white/10 px-3 py-2 shadow-[0_12px_24px_rgba(0,0,0,0.25)]"
                 >
-                  <span>{player.name}</span>
-                  <span className="text-xs font-black text-white bg-black p-2 rounded-full">Level {player.hiveLevel}</span>
+                  <div className="flex items-center gap-3">
+                    <div className="relative grid h-10 w-10 place-items-center rounded-full backdrop-blur-sm">
+                      <img
+                        src="/bee128.png"
+                        alt="Player Beevatar"
+                        className="h-8 w-8 rounded-full border-2  border-black/20 object-cover bg-black/50"
+                      />
+                    </div>
+                    <span>{player.name}</span>
+                  </div>
+                  <span className="rounded-full bg-yellow-300/75 px-3 py-1 text font-black text-black backdrop-blur-sm">
+                    {player.hiveLevel}
+                  </span>
                 </div>
               ))
             )}
