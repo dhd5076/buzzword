@@ -38,6 +38,8 @@ export default function Game() {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [profiles, setProfiles] = useState<string[]>([]);
   const [selectedProfile, setSelectedProfile] = useState("");
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [devtoolsNotified, setDevtoolsNotified] = useState(false);
 
   //So we can participate as the same player on reloads
   //Player ID is stored in localStorage per room
@@ -95,6 +97,27 @@ export default function Game() {
       window.clearInterval(intervalId);
     };
   }, [roomId]);
+
+  useEffect(() => {
+    if (devtoolsNotified) return;
+    if (typeof navigator !== "undefined" && /Mobi|Android/i.test(navigator.userAgent)) {
+      return;
+    }
+    const threshold = 160;
+    const intervalId = window.setInterval(() => {
+      const widthDelta = Math.abs(window.outerWidth - window.innerWidth);
+      const heightDelta = Math.abs(window.outerHeight - window.innerHeight);
+      const isOpen = widthDelta > threshold || heightDelta > threshold;
+      if (isOpen) {
+        setDevtoolsNotified(true);
+        window.alert("👀 The hive notices your curiosity. \n Welcome, beekeeper \n Please do not tap the glass.");
+      }
+    }, 1000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [devtoolsNotified]);
 
   useEffect(() => {
     if (gameState?.phase !== "prompt") {
@@ -200,11 +223,50 @@ export default function Game() {
         </div>
       )}
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
-        <div>
-          <div className="text-xs uppercase tracking-[0.3em] text-white/60">
-            Room
+        <div className="flex items-center gap-4">
+          <div>
+            <div className="text-xs uppercase tracking-[0.3em] text-white/60">
+              Room
+            </div>
+            <div className="text-lg font-semibold">{roomId}</div>
           </div>
-          <div className="text-lg font-semibold">{roomId}</div>
+          <button
+            type="button"
+            className="flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-white/80 transition hover:bg-white/20"
+            onClick={async () => {
+              if (!roomId) return;
+              const url = `${window.location.origin}/game?roomId=${roomId}`;
+              try {
+                await navigator.clipboard.writeText(url);
+                setLinkCopied(true);
+                window.setTimeout(() => setLinkCopied(false), 2000);
+              } catch (error) {
+                console.error("Failed to copy game link:", error);
+              }
+            }}
+          >
+            {linkCopied ? (
+              "Game Link Copied"
+            ) : (
+              <>
+                <svg
+                  aria-hidden="true"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M8 12a4 4 0 0 1 4-4h4a4 4 0 1 1 0 8h-4" />
+                  <path d="M16 12a4 4 0 0 1-4 4H8a4 4 0 1 1 0-8h4" />
+                </svg>
+                Copy Link
+              </>
+            )}
+          </button>
         </div>
         <div className="text-sm text-white/60">Phase: {gameState?.phase.toUpperCase() ?? "..."}</div>
       </header>

@@ -45,6 +45,7 @@ public/          Static assets
 ## Notes
 
 - Room state is stored in-memory for MVP.
+- Redundant storage configurations are discouraged. It's not good for the bees
 - Server Actions are used for create/join/submit flows.
 - `/api/game/[id]` is used for polling game state.
 
