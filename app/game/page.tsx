@@ -9,7 +9,13 @@ type GameState = {
   phase: string;
   version: number;
   prompt?: string | null;
-  players?: Array<{ id: string; name: string; hiveLevel: number; isHost: boolean }>;
+  players?: Array<{
+    id: string;
+    name: string;
+    hiveLevel: number;
+    isHost: boolean;
+    profile: string;
+  }>;
   results?: {
     clusters: Array<{
       clusterName: string;
@@ -30,6 +36,8 @@ export default function Game() {
   const [username, setUsername] = useState("");
   const [isJoining, setIsJoining] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [profiles, setProfiles] = useState<string[]>([]);
+  const [selectedProfile, setSelectedProfile] = useState("");
 
   //So we can participate as the same player on reloads
   //Player ID is stored in localStorage per room
@@ -42,6 +50,30 @@ export default function Game() {
     const stored = window.localStorage.getItem(storageKey);
     if (stored) setPlayerId(stored);
   }, [roomId, storageKey]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchProfiles = async () => {
+      try {
+        const res = await fetch("/api/profiles");
+        if (!res.ok) return;
+        const data = (await res.json()) as { profiles?: string[] };
+        if (!isMounted) return;
+        const list = data.profiles ?? [];
+        setProfiles(list);
+        if (!selectedProfile && list.length > 0) {
+          const defaultProfile = list.includes("Classic Bee") ? "Classic Bee" : list[0];
+          setSelectedProfile(defaultProfile);
+        }
+      } catch (error) {
+        console.error("Failed to load profiles:", error);
+      }
+    };
+    fetchProfiles();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!roomId) return;
@@ -96,11 +128,18 @@ export default function Game() {
                 if (!name) return;
                 setIsJoining(true);
                 try {
-                  const id = crypto.randomUUID();
+                  const id =
+                    typeof crypto.randomUUID === "function"
+                      ? crypto.randomUUID()
+                      : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
                   const res = await fetch(`/api/game/${roomId}/join`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ playerId: id, name }),
+                    body: JSON.stringify({
+                      playerId: id,
+                      name,
+                      profile: selectedProfile
+                    }),
                   });
                   if (!res.ok) return;
                   window.localStorage.setItem(storageKey, id);
@@ -117,6 +156,38 @@ export default function Game() {
                 value={username}
                 onChange={(event) => setUsername(event.target.value)}
               />
+              <label className="block text-xs uppercase tracking-[0.3em] text-white/60">
+                Avatar
+                <div className="mt-3 flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                  <img
+                    src={
+                      selectedProfile
+                        ? `/profiles/${encodeURIComponent(selectedProfile)}.png`
+                        : "/bee128.png"
+                    }
+                    alt="Selected avatar"
+                    className="h-16 w-16 rounded-full border border-white/20 object-cover"
+                  />
+                  <span className="text-sm font-semibold text-white">
+                    {username.trim() ? username : "USERNAME"}
+                  </span>
+                </div>
+                <select
+                  className="mt-2 w-full rounded-xl bg-white/10 px-4 py-3 text-sm text-white"
+                  value={selectedProfile}
+                  onChange={(event) => setSelectedProfile(event.target.value)}
+                >
+                  {profiles.length === 0 ? (
+                    <option value="">Loading...</option>
+                  ) : (
+                    profiles.map((profile) => (
+                      <option key={profile} value={profile}>
+                        {profile}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </label>
               <button
                 className="w-full rounded-xl bg-yellow-300 px-4 py-3 text-sm font-semibold text-black disabled:opacity-70"
                 type="submit"
@@ -139,8 +210,8 @@ export default function Game() {
       </header>
 
       <main className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 px-6 pb-10 md:grid-cols-[1fr_2fr_1fr]">
-        <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <div className="text-xs uppercase tracking-[0.3em] text-white/60">
+        <section className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-6">
+          <div className="text-xs uppercase tracking-[0.3em] text-white">
             Prompt
           </div>
           <div className="mt-2 text-xl font-semibold">
@@ -185,8 +256,8 @@ export default function Game() {
           )}
         </section>
 
-        <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <div className="text-xs uppercase tracking-[0.3em] text-white/60">
+        <section className="rounded-2xl border border-white/10 bg-black/20 backdrop-blur p-6">
+          <div className="text-xs uppercase tracking-[0.3em] text-white">
             Board
           </div>
           <div className="mt-4 text-sm text-white/40">
@@ -297,8 +368,8 @@ export default function Game() {
                                 </div>
                                 <div className="text-xs text-white/60">
                                   {answer.players.length > 0
-                                    ? `Players: ${answer.players.join(", ")}`
-                                    : "Players: —"}
+                                    ? `${answer.players.join(", ")}`
+                                    : ""}
                                 </div>
                               </div>
                             ))}
@@ -324,25 +395,31 @@ export default function Game() {
           </div>
         </section>
 
-        <aside className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <div className="text-xs uppercase tracking-[0.3em] text-white/60">
+        <aside className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-6">
+          <div className="text-xs uppercase tracking-[0.3em] text-white">
             Players
           </div>
           <div className="mt-4 space-y-3 text-sm">
             {(gameState?.players ?? []).length === 0 ? (
               <div className="text-white/40">No players yet</div>
             ) : (
-              gameState?.players?.map((player) => (
+              [...(gameState?.players ?? [])]
+                .sort((a, b) => b.hiveLevel - a.hiveLevel)
+                .map((player) => (
                 <div
                   key={player.id}
-                  className="flex items-center justify-between rounded-xl bg-white/10 px-3 py-2 shadow-[0_12px_24px_rgba(0,0,0,0.25)]"
+                  className="flex items-center justify-between rounded-xl bg-white/20 px-3 py-2 shadow-[0_12px_24px_rgba(0,0,0,0.25)]"
                 >
                   <div className="flex items-center gap-3">
                     <div className="relative grid h-10 w-10 place-items-center rounded-full backdrop-blur-sm">
                       <img
-                        src="/bee128.png"
-                        alt="Player Beevatar"
-                        className="h-8 w-8 rounded-full border-2  border-black/20 object-cover bg-black/50"
+                        src={
+                          player.profile
+                            ? `/profiles/${encodeURIComponent(player.profile)}.png`
+                            : "/bee128.png"
+                        }
+                        alt={`${player.name} avatar`}
+                        className="h-8 w-8 rounded-full border-2 border-black/20 object-cover bg-black/50"
                       />
                     </div>
                     <span>{player.name}</span>

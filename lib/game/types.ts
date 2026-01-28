@@ -10,6 +10,7 @@ export type Player = {
     score: number,
     hiveLevel: number,
     isHost: boolean,
+    profile: string,
     answers: string[] | null;
 }
 

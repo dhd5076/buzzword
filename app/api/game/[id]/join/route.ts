@@ -14,6 +14,7 @@ export async function POST(request: Request, { params }: RouteParams) {
   const body = (await request.json()) as {
     playerId?: string;
     name?: string;
+    profile?: string;
   };
 
   if (!body.playerId || !body.name) {
@@ -25,6 +26,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: "Game not found" }, { status: 404 });
   }
 
-  game.addPlayer(body.playerId, body.name);
+  const profile = body.profile?.trim() || "Classic Bee";
+  game.addPlayer(body.playerId, body.name, profile);
   return NextResponse.json(game.getState());
 }

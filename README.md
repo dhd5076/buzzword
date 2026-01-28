@@ -60,5 +60,5 @@ public/          Static assets
 **The Hive** <br>
 Attn: Quality Assurance <br>
 1 Honeycomb Way <br>
-Buzzville, <br>
+Buzzville, IL 62644<br>
 

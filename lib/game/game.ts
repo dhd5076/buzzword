@@ -18,7 +18,7 @@ export class Game {
         };
     }
 
-    addPlayer(id: string, name: string) {
+    addPlayer(id: string, name: string, profile: string) {
         const isHost = this.state.players.length === 0;
         const player: Player = {
             id,
@@ -26,6 +26,7 @@ export class Game {
             score: 0,
             hiveLevel: 4,
             isHost,
+            profile,
             answers: null
         };
         this.state.players.push(player);
