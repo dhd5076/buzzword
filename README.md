@@ -4,6 +4,8 @@
 
 Buzzword is a multiplayer party game about social alignment. Players answer open-ended prompts and score by matching others. Drift too far from the group and you're out.
 
+Demo: https://buzzword.dylandunn.me
+
 ## Status
 
 MVP in progress. Single-instance, in-memory game state.
@@ -62,4 +64,3 @@ public/          Static assets
 Attn: Quality Assurance <br>
 1 Honeycomb Way <br>
 Buzzville, IL 62644<br>
-

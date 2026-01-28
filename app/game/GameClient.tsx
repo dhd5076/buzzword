@@ -151,6 +151,7 @@ export default function GameClient() {
                 const name = username.trim();
                 if (!name) return;
                 setIsJoining(true);
+                //Should probably be server side, but doesn't current present a security issue that I know of.
                 try {
                   const id =
                     typeof crypto.randomUUID === "function"
